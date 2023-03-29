@@ -35,20 +35,22 @@ fn read_entire_xml_file(path: &str) -> Result<String> {
     let er = EventReader::new(file);
 
     let mut content = String::new();
+
+
     for event in er.into_iter() {
-        let event = event.unwrap_or_else(|_err| {
-            println!("We have error while reading the file");
+        let event = event.unwrap_or_else(|err| {
+            println!("We have a problem reading this event");
             exit(1)
         });
 
         match event {
             xml::reader::XmlEvent::Characters(text) => {
                 content.push_str(&text);
-                println!("{text}");
-            }
+            },
             _ => {}
         }
     }
 
     Ok(content)
+    
 }
