@@ -36,7 +36,6 @@ fn read_entire_xml_file(path: &str) -> Result<String> {
 
     let mut content = String::new();
 
-
     for event in er.into_iter() {
         let event = event.unwrap_or_else(|err| {
             println!("We have a problem reading this event");
@@ -46,11 +45,10 @@ fn read_entire_xml_file(path: &str) -> Result<String> {
         match event {
             xml::reader::XmlEvent::Characters(text) => {
                 content.push_str(&text);
-            },
+            }
             _ => {}
         }
     }
 
     Ok(content)
-    
 }
