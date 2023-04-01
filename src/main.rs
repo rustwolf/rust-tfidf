@@ -6,20 +6,38 @@ use std::path::Path;
 use std::{fs, process::exit};
 use xml::reader::EventReader;
 
-fn main() {
-    let _all_documents = HashMap::<String, HashMap<String, i32>>::new();
 
-    let dir_path = "docs.gl/gl4";
-    let dir = fs::read_dir(&dir_path).unwrap();
-    for file in dir {
-        let path = file.unwrap().path();
-
-        let path = path.display().to_string();
-
-        let content = read_entire_xml_file(&path).unwrap();
-
-        println!("{content}");
+#[derive(Debug)]
+struct Lexer<'a> {
+    content : &'a [char]
+}
+impl <'a> Lexer <'a> {
+    fn new(content : &'a [char]) -> Self {
+        Self { content : content}
     }
+}
+
+
+fn main() {
+    let content = read_entire_xml_file("./docs.gl/el3/abs.xhtml");
+    let data = content.unwrap().chars().collect::<Vec<_>>();
+    let lexer = Lexer::new(&data);
+    println!("{lexer:?}");
+    
+
+    // let _all_documents = HashMap::<String, HashMap<String, i32>>::new();
+
+    // let dir_path = "docs.gl/gl4";
+    // let dir = fs::read_dir(&dir_path).unwrap();
+    // for file in dir {
+    //     let path = file.unwrap().path();
+
+    //     let path = path.display().to_string();
+
+    //     let content = read_entire_xml_file(&path).unwrap();
+
+    //     println!("{content}");
+    // }
 }
 
 fn index_document(document_content: &str) -> HashMap<String, i32> {
