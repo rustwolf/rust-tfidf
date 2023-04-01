@@ -6,24 +6,60 @@ use std::path::Path;
 use std::{fs, process::exit};
 use xml::reader::EventReader;
 
-
 #[derive(Debug)]
 struct Lexer<'a> {
-    content : &'a [char]
+    content: &'a [char],
 }
-impl <'a> Lexer <'a> {
-    fn new(content : &'a [char]) -> Self {
-        Self { content : content}
+impl<'a> Lexer<'a> {
+    fn new(content: &'a [char]) -> Self {
+        Self { content: content }
+    }
+
+    fn trim_left(&mut self) {
+        while self.content.len() > 0 && self.content[0].is_whitespace() {
+            self.content = &self.content[1..];
+        }
+    }
+
+    fn next_token(&mut self) -> Option<&'a [char]> {
+        self.trim_left();
+
+        if self.content.len() == 0 {
+            return None;
+        }
+
+        if self.content[0].is_alphabetic() {
+            let mut n = 0;
+
+            while n < self.content.len() && self.content[n].is_alphabetic() {
+                n += 1;
+            }
+            let token = &self.content[0..n];
+            self.content = &self.content[n..];
+
+            return Some(&token);
+        }
+
+        todo!();
     }
 }
 
+impl<'a> Iterator for Lexer<'a> {
+    type Item = &'a [char];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_token()
+    }
+}
 
 fn main() {
     let content = read_entire_xml_file("./docs.gl/el3/abs.xhtml");
     let data = content.unwrap().chars().collect::<Vec<_>>();
     let lexer = Lexer::new(&data);
-    println!("{lexer:?}");
-    
+
+    for token in lexer {
+        println!("{token}", token = token.iter().collect::<String>());
+    }
 
     // let _all_documents = HashMap::<String, HashMap<String, i32>>::new();
 
@@ -63,6 +99,7 @@ fn read_entire_xml_file(path: &str) -> Result<String> {
         match event {
             xml::reader::XmlEvent::Characters(text) => {
                 content.push_str(&text);
+                content.push_str(" ");
             }
             _ => {}
         }
