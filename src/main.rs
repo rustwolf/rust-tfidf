@@ -28,6 +28,17 @@ impl<'a> Lexer<'a> {
             return None;
         }
 
+        if self.content[0].is_numeric() {
+            let mut n = 0;
+            while n < self.content.len() && self.content[n].is_numeric() {
+                n += 1;
+            }
+
+            let token = &self.content[0..n];
+            self.content = &self.content[n..];
+            return Some(token);
+        }
+
         if self.content[0].is_alphabetic() {
             let mut n = 0;
 
@@ -40,7 +51,16 @@ impl<'a> Lexer<'a> {
             return Some(&token);
         }
 
-        todo!();
+
+        let token = &self.content[0..1];
+        self.content = &self.content[1..];
+
+        // self.content = &self.content[1..];
+        return Some(token);
+
+        // todo!("Invalid Token started with {}", self.content[0]);
+
+
     }
 }
 
@@ -58,7 +78,9 @@ fn main() {
     let lexer = Lexer::new(&data);
 
     for token in lexer {
-        println!("{token}", token = token.iter().collect::<String>());
+        println!("{token}", token = token.iter().map(|e| {
+            return e.to_ascii_uppercase();
+        }).collect::<String>());
     }
 
     // let _all_documents = HashMap::<String, HashMap<String, i32>>::new();
