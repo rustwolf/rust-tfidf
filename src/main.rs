@@ -77,11 +77,31 @@ fn main() {
     let data = content.unwrap().chars().collect::<Vec<_>>();
     let lexer = Lexer::new(&data);
 
+    let mut tf = HashMap::<String, i32>::new();
+
     for token in lexer {
-        println!("{token}", token = token.iter().map(|e| {
-            return e.to_ascii_uppercase();
-        }).collect::<String>());
+        // println!("{token}", token = token.iter().map(|e| {
+        //     return e.to_ascii_uppercase();
+        // }).collect::<String>());
+
+        let term = token.iter().map(|t| t.to_ascii_uppercase()).collect::<String>();
+        // println!("{term}");
+
+        match tf.get(&term) {
+            Some(count) => {
+                tf.insert(term, count + 1);
+            },
+            None => {
+                tf.insert(term, 1);
+            }
+        }
     }
+
+
+    println!("{tf:?}");
+
+    
+
 
     // let _all_documents = HashMap::<String, HashMap<String, i32>>::new();
 
