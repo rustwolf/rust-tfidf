@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::default;
 use std::fs::{DirEntry, File};
+use std::hash::Hash;
 use std::io::Result;
 use std::path::Path;
 use std::{fs, process::exit};
@@ -73,19 +74,43 @@ impl<'a> Iterator for Lexer<'a> {
 }
 
 fn main() {
-    let content = read_entire_xml_file("./docs.gl/el3/abs.xhtml");
+
+
+    let mut tf_by_file = HashMap::<String, HashMap<String, i32>>::new();
+
+    let dir_path = "docs.gl/gl4";
+    let dir = fs::read_dir(&dir_path).unwrap();
+    for file in dir {
+        let path = file.unwrap().path();
+
+        let path = path.display().to_string();
+
+        // let content = read_entire_xml_file(&path).unwrap();
+
+        let (file, result) = get_tf_by_document(String::from(&path));
+        
+        tf_by_file.insert(file, result);
+    }
+
+
+    let json_file = File::create("result.json").unwrap();
+    serde_json::to_writer(json_file, &tf_by_file).expect("We have a error");
+
+    // println!("{tf_by_file:?}");
+    
+
+}
+
+fn get_tf_by_document(file_path : String) -> (String, HashMap<String, i32>) {
+    let content = read_entire_xml_file(&file_path);
     let data = content.unwrap().chars().collect::<Vec<_>>();
     let lexer = Lexer::new(&data);
 
     let mut tf = HashMap::<String, i32>::new();
 
     for token in lexer {
-        // println!("{token}", token = token.iter().map(|e| {
-        //     return e.to_ascii_uppercase();
-        // }).collect::<String>());
 
         let term = token.iter().map(|t| t.to_ascii_uppercase()).collect::<String>();
-        // println!("{term}");
 
         match tf.get(&term) {
             Some(count) => {
@@ -98,24 +123,25 @@ fn main() {
     }
 
 
-    println!("{tf:?}");
+    let mut stats = tf.iter().collect::<Vec<_>>();
 
     
+    stats.sort_by_key(| (t,f) | {
+        return *f;
+    });
 
+    stats.reverse();
 
-    // let _all_documents = HashMap::<String, HashMap<String, i32>>::new();
+    // println!("{stats:?}");
 
-    // let dir_path = "docs.gl/gl4";
-    // let dir = fs::read_dir(&dir_path).unwrap();
-    // for file in dir {
-    //     let path = file.unwrap().path();
+    let mut to_return = HashMap::<String, i32>::new();
 
-    //     let path = path.display().to_string();
+    for (k, i) in stats.iter().take(10) {
+        to_return.insert(k.to_string(), **i);
+    }
 
-    //     let content = read_entire_xml_file(&path).unwrap();
+    return (file_path, to_return);
 
-    //     println!("{content}");
-    // }
 }
 
 fn index_document(document_content: &str) -> HashMap<String, i32> {
