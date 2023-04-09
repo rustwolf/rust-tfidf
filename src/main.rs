@@ -52,16 +52,10 @@ impl<'a> Lexer<'a> {
             return Some(&token);
         }
 
-
         let token = &self.content[0..1];
         self.content = &self.content[1..];
 
-        // self.content = &self.content[1..];
         return Some(token);
-
-        // todo!("Invalid Token started with {}", self.content[0]);
-
-
     }
 }
 
@@ -74,8 +68,6 @@ impl<'a> Iterator for Lexer<'a> {
 }
 
 fn main() {
-
-
     let mut tf_by_file = HashMap::<String, HashMap<String, i32>>::new();
 
     let dir_path = "docs.gl/gl4";
@@ -88,20 +80,17 @@ fn main() {
         // let content = read_entire_xml_file(&path).unwrap();
 
         let (file, result) = get_tf_by_document(String::from(&path));
-        
+
         tf_by_file.insert(file, result);
     }
-
 
     let json_file = File::create("result.json").unwrap();
     serde_json::to_writer(json_file, &tf_by_file).expect("We have a error");
 
     // println!("{tf_by_file:?}");
-    
-
 }
 
-fn get_tf_by_document(file_path : String) -> (String, HashMap<String, i32>) {
+fn get_tf_by_document(file_path: String) -> (String, HashMap<String, i32>) {
     let content = read_entire_xml_file(&file_path);
     let data = content.unwrap().chars().collect::<Vec<_>>();
     let lexer = Lexer::new(&data);
@@ -109,24 +98,24 @@ fn get_tf_by_document(file_path : String) -> (String, HashMap<String, i32>) {
     let mut tf = HashMap::<String, i32>::new();
 
     for token in lexer {
-
-        let term = token.iter().map(|t| t.to_ascii_uppercase()).collect::<String>();
+        let term = token
+            .iter()
+            .map(|t| t.to_ascii_uppercase())
+            .collect::<String>();
 
         match tf.get(&term) {
             Some(count) => {
                 tf.insert(term, count + 1);
-            },
+            }
             None => {
                 tf.insert(term, 1);
             }
         }
     }
 
-
     let mut stats = tf.iter().collect::<Vec<_>>();
 
-    
-    stats.sort_by_key(| (t,f) | {
+    stats.sort_by_key(|(t, f)| {
         return *f;
     });
 
@@ -141,7 +130,6 @@ fn get_tf_by_document(file_path : String) -> (String, HashMap<String, i32>) {
     }
 
     return (file_path, to_return);
-
 }
 
 fn index_document(document_content: &str) -> HashMap<String, i32> {
